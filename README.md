@@ -35,7 +35,7 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio wor
 ---
 
 ## 🚀 Getting Started (Download for macOS)
-<a href="https://github.com/cyogesh56/Alt-Tag-Studio/releases/tag/Prod">Download from Releases section</a>
+
 [![Download from Releases](https://img.shields.io/badge/Download%20from%20Releases-blue?style=for-the-badge&logo=github)](https://github.com/cyogesh56/Alt-Tag-Studio/releases/tag/Prod)
 
 ## 🚀 Getting Started (Development)
