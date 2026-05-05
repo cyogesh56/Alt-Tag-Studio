@@ -34,6 +34,8 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio wor
 
 ---
 
+## 🚀 Getting Started (Download for macOS)
+
 ## 🚀 Getting Started (Development)
 
 Want to run Alt-Tag Studio locally, contribute, or build your own desktop version? Follow these steps:
