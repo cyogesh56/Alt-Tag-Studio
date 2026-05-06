@@ -24,16 +24,6 @@ export default defineConfig(({mode}) => {
           target: 'https://api.openai.com',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/openai/, '')
-        },
-        '/api/qwen': {
-          target: 'https://dashscope.aliyuncs.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/qwen/, '')
-        },
-        '/api/deepseek': {
-          target: 'https://api.deepseek.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/deepseek/, '')
         }
       }
     },

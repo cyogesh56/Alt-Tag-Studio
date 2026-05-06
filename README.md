@@ -15,8 +15,6 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio wor
   - 🧠 Google Gemini
   - 💬 OpenAI ChatGPT
   - 🎭 Anthropic Claude
-  - 🟣 Alibaba Qwen
-  - 🔵 DeepSeek
 - **Smart Auto-Switching:** Save multiple API keys. If your primary provider hits a rate limit or runs out of quota, the app instantly pauses and prompts you to switch to a backup provider seamlessly without losing progress.
 - **Privacy-First Local Processing:** Your HTML files are parsed entirely in your browser using the File System Access API. Only the images that actually need alt texts are securely sent to the AI vision models as base64 strings.
 - **In-Place Seamless Saves:** No more managing duplicate `file-copy(1).html` files. Hit **Overwrite HTML** to instantly and silently append the AI-generated alt tags directly into your original local HTML file.
