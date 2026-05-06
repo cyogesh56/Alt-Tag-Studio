@@ -9,6 +9,8 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio wor
 
 ---
 
+![Alt-Tag Studio Demo](https://github.com/cyogesh56/Alt-Tag-Studio/blob/0a3d6eba5074e30b18f1a065f9a32b93b0b53d6c/Alt-Tag%20Studio%20Demo.webp)
+
 ## ✨ Features
 
 - **Multi-AI Provider Support:** Connect your API keys to industry-leading vision models. Includes out-of-the-box support for:
