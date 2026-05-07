@@ -11,24 +11,26 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio wor
 
 ## ✨ Features
 
+- **Project-Wide IDE Layout:** Select your entire project folder and manage all HTML/HTM files dynamically from a sleek, Visual Studio-style resizable file explorer.
+- **Multi-File Tabbed Editor:** Open multiple HTML files simultaneously and easily navigate between them via tabs.
+- **Session Restoration:** Automatically jump back into your last opened project on app restart.
+- **Auto-Save & In-Place Seamless Saves:** Background 5-minute auto-save keeps your progress safe. You can also save in-place, save a copy, or restore the original file from the sidebar.
 - **Multi-AI Provider Support:** Connect your API keys to industry-leading vision models. Includes out-of-the-box support for:
   - 🧠 Google Gemini
   - 💬 OpenAI ChatGPT
   - 🎭 Anthropic Claude
-- **Smart Auto-Switching:** Save multiple API keys. If your primary provider hits a rate limit or runs out of quota, the app instantly pauses and prompts you to switch to a backup provider seamlessly without losing progress.
-- **Privacy-First Local Processing:** Your HTML files are parsed entirely in your browser using the File System Access API. Only the images that actually need alt texts are securely sent to the AI vision models as base64 strings.
-- **In-Place Seamless Saves:** No more managing duplicate `file-copy(1).html` files. Hit **Overwrite HTML** to instantly and silently append the AI-generated alt tags directly into your original local HTML file.
+- **Privacy-First Local Processing:** Your project files are parsed entirely locally. Only the specific images being processed are securely sent to the AI vision models as base64 strings.
 - **Live Code Preview:** See exactly where your images exist in your HTML with real-time, auto-scrolling syntax highlighting.
-- **Accessibility & UX:** Includes extensive keyboard shortcuts (e.g., `Cmd+G` to generate, `Cmd+S` to save & next), beautiful Dark/Light mode UI, and screen-reader polite announcements.
+- **Accessibility & UX:** Includes extensive keyboard shortcuts, beautiful Dark/Light mode UI, resizable panels, and screen-reader polite announcements.
 
 ---
 
 ## 🛠️ How It Works
 
-1. **Select your HTML:** Click to select an HTML file from your local machine. The app instantly parses the DOM to locate all `<img>` tags missing `alt` attributes.
-2. **Pick Image Folder:** Point the app to your project's local image directory. It automatically cross-references and matches the `src` paths from the HTML to your local files.
-3. **Generate:** The app displays the image and surrounding code context. Click Generate to let the AI vision model analyze the image and return a concise, WCAG-compliant alt-text.
-4. **Save:** Click "Update & Next" to apply the text. When you're done, hit "Overwrite HTML" to permanently save the changes to your local file. 
+1. **Configure Provider:** Enter the API Key for your preferred AI provider in the setup screen or settings.
+2. **Open Project Folder:** Select your website's root folder. The IDE will automatically scan and build a file tree.
+3. **Select HTML Files:** Click any `.html` file from the explorer to open it in a new tab.
+4. **Generate & Update:** The app displays the image and surrounding code context. Click **Generate with AI** to let the AI analyze the image, or write it manually. Click **Update & Next** to seamlessly inject the `alt` attribute back into your local file.
 
 ---
 

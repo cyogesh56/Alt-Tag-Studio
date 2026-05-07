@@ -18,6 +18,14 @@ function createWindow() {
   // Load the React app from the Vite build output
   mainWindow.loadFile(path.join(__dirname, 'dist', 'index.html'));
   
+  // Intercept target="_blank" links to open in the user's default external browser
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      require('electron').shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+  
   // Uncomment below to open DevTools
   // mainWindow.webContents.openDevTools();
 }
