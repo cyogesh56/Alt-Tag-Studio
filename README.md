@@ -13,6 +13,7 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
 
 ## ✨ Features
 
+- **Available on macOS, Windows & Linux:** A truly cross-platform app to empower your workflow wherever you are.
 - **Project-Wide IDE Layout:** Select your entire project folder and manage all HTML/HTM files dynamically from a sleek, Visual Studio-style 3-column static file explorer.
 - **Multi-File Tabbed Editor:** Open multiple HTML files simultaneously and easily navigate between them via tabs.
 - **Session Restoration:** Automatically jump back into your last opened project on app restart.
