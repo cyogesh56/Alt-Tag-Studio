@@ -19,9 +19,9 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
 - **Session Restoration:** Automatically jump back into your last opened project on app restart.
 - **Auto-Save & In-Place Seamless Saves:** Background 5-minute auto-save keeps your progress safe. You can also save in-place, save a copy, or restore the original file from the sidebar.
 - **Multi-AI Provider Support:** Connect your API keys to industry-leading vision models. Includes out-of-the-box support for:
-  - 🧠 Google Gemini
-  - 💬 OpenAI ChatGPT
-  - 🎭 Anthropic Claude
+  - <img src="https://cdn.simpleicons.org/googlegemini/8E75B2" width="16" height="16" alt="Gemini Logo" /> Google Gemini
+  - <img src="https://cdn.simpleicons.org/openai/412991" width="16" height="16" alt="ChatGPT Logo" /> OpenAI ChatGPT
+  - <img src="https://cdn.simpleicons.org/anthropic/D97757" width="16" height="16" alt="Claude Logo" /> Anthropic Claude
 - **Smart Auto-Switching:** If your active model runs out of quota (429 rate limit), the app automatically switches to your next configured API key to prevent workflow interruption. (Requires 2+ keys saved).
 - **Privacy-First Local Processing:** Your project files are parsed entirely locally. Only the specific images being processed are securely sent to the AI vision models as base64 strings.
 - **Live Code Preview:** See exactly where your images exist in your HTML with real-time, auto-scrolling syntax highlighting with automatic long-line text wrapping.
