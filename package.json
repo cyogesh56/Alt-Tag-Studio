@@ -12,7 +12,9 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "electron:start": "npm run build && electron .",
-    "electron:build": "npm run build && electron-builder -m"
+    "electron:build": "npm run build && electron-builder -m",
+    "electron:build:win": "npm run build && electron-builder -w",
+    "electron:build:linux": "npm run build && electron-builder -l"
   },
   "build": {
     "appId": "com.yogeshsingh.alttagstudio",
@@ -20,6 +22,15 @@
     "mac": {
       "category": "public.app-category.developer-tools",
       "icon": "public/logo.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "public/logo.png"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "public/logo.png",
+      "category": "Development"
     },
     "directories": {
       "buildResources": "public"
