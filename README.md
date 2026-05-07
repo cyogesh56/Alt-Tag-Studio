@@ -5,7 +5,7 @@
 
 **Alt-Tag Studio** is a powerful, privacy-first, AI-driven application designed to automate the tedious process of writing WCAG-compliant `alt` texts for HTML images. 
 
-Rather than uploading your entire codebase to an online tool, Alt-Tag Studio works completely **locally in your browser**. It uses the modern File System Access API to parse your HTML, read your local image folders securely, and seamlessly inject AI-generated alt texts back into your original HTML files without requiring you to manually copy, paste, or download duplicated files.
+Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is a native desktop application that works completely **locally on your machine**. It uses the modern File System Access API to parse your HTML, read your local image folders securely, and seamlessly inject AI-generated alt texts back into your original HTML files without requiring you to manually copy, paste, or download duplicated files.
 
 ---
 
@@ -13,7 +13,7 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio wor
 
 ## ✨ Features
 
-- **Project-Wide IDE Layout:** Select your entire project folder and manage all HTML/HTM files dynamically from a sleek, Visual Studio-style resizable file explorer.
+- **Project-Wide IDE Layout:** Select your entire project folder and manage all HTML/HTM files dynamically from a sleek, Visual Studio-style 3-column static file explorer.
 - **Multi-File Tabbed Editor:** Open multiple HTML files simultaneously and easily navigate between them via tabs.
 - **Session Restoration:** Automatically jump back into your last opened project on app restart.
 - **Auto-Save & In-Place Seamless Saves:** Background 5-minute auto-save keeps your progress safe. You can also save in-place, save a copy, or restore the original file from the sidebar.
@@ -21,18 +21,39 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio wor
   - 🧠 Google Gemini
   - 💬 OpenAI ChatGPT
   - 🎭 Anthropic Claude
+- **Smart Auto-Switching:** If your active model runs out of quota (429 rate limit), the app automatically switches to your next configured API key to prevent workflow interruption. (Requires 2+ keys saved).
 - **Privacy-First Local Processing:** Your project files are parsed entirely locally. Only the specific images being processed are securely sent to the AI vision models as base64 strings.
-- **Live Code Preview:** See exactly where your images exist in your HTML with real-time, auto-scrolling syntax highlighting.
-- **Accessibility & UX:** Includes extensive keyboard shortcuts, beautiful Dark/Light mode UI, resizable panels, and screen-reader polite announcements.
+- **Live Code Preview:** See exactly where your images exist in your HTML with real-time, auto-scrolling syntax highlighting with automatic long-line text wrapping.
+- **Accessibility & UX:** Fully accessible with custom hover tooltips, screen-reader polite announcements, WCAG AA compliant contrast ratios, and a beautiful Dark/Light mode UI.
 
 ---
 
 ## 🛠️ How It Works
 
-1. **Configure Provider:** Enter the API Key for your preferred AI provider in the setup screen or settings.
+1. **Configure Provider:** Enter the API Key for your preferred AI provider in the setup screen or Settings. The AI dropdowns will dynamically only show providers you have configured keys for.
 2. **Open Project Folder:** Select your website's root folder. The IDE will automatically scan and build a file tree.
 3. **Select HTML Files:** Click any `.html` file from the explorer to open it in a new tab.
 4. **Generate & Update:** The app displays the image and surrounding code context. Click **Generate with AI** to let the AI analyze the image, or write it manually. Click **Update & Next** to seamlessly inject the `alt` attribute back into your local file.
+
+---
+
+## 📝 Changelog
+
+### v1.0.6
+- **Architecture:** Transitioned from a simple linear flow to a comprehensive Project-Wide IDE layout.
+- **Feature:** Added native multi-file support. You can now open an entire directory and manage multiple HTML files via a tabbed interface.
+- **Feature:** Session Persistence. The app automatically remembers your active project folder on restart.
+- **Feature:** Introduced Auto-Switch logic that automatically falls back to the next saved API key if the active one runs out of quota (`429` error). This feature dynamically disables if fewer than two API keys are configured.
+- **Feature:** Added robust decoding support to gracefully handle complex file paths (e.g., spaces converted to `%20`).
+- **Feature:** Extensive Editor actions (Save a Copy, Restore Original, Skip Image, Navigate Back).
+- **Enhancement:** AI Provider dropdowns dynamically filter to only display configured providers and use beautiful official provider SVG icons.
+- **UI & Accessibility:** Restored the clean, static 3-column flexbox layout (Explorer, Code, Preview). Fast-rendering custom hover tooltips added for all sidebar actions.
+- **UX & Rendering:** System toast notifications now gracefully animate from the bottom-center. Deep text-wrapping added to the code preview to eliminate horizontal scrolling.
+- **Fix:** Intercepted all external links (e.g., "Get Key") to open in the user's default system browser rather than inside an internal Electron window.
+- **Cleanup:** Removed deprecated API providers (DeepSeek, Qwen) to focus on top-tier multimodal vision models.
+
+### v1.0.0
+- **Initial Release:** Privacy-first, local File System Access API parsing for automated WCAG-compliant Alt-Text generation using Google Gemini, OpenAI ChatGPT, and Anthropic Claude.
 
 ---
 
