@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { GoogleGenAI } from '@google/genai';
-import { Zap, RotateCcw, Save, SkipForward, SkipBack } from 'lucide-react';
+import { Zap, RotateCcw, Save, SkipForward, SkipBack, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -72,6 +72,8 @@ interface EditorProps {
   isAutoSaveEnabled: boolean;
   autoSwitchEnabled: boolean;
   onContentChange?: () => void;
+  altTextMemory: Record<string, string>;
+  setAltTextMemory: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 export interface EditorRef {
@@ -80,7 +82,7 @@ export interface EditorRef {
   restoreOriginal: () => void;
 }
 
-export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectDirHandle, apiKeys, aiProvider: defaultAiProvider, showToast, isAutoSaveEnabled, autoSwitchEnabled, onContentChange }, ref) => {
+export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectDirHandle, apiKeys, aiProvider: defaultAiProvider, showToast, isAutoSaveEnabled, autoSwitchEnabled, onContentChange, altTextMemory, setAltTextMemory }, ref) => {
   const [htmlContent, setHtmlContent] = useState('');
   const [originalHtmlContent, setOriginalHtmlContent] = useState('');
   const [imagesArr, setImagesArr] = useState<any[]>([]);
@@ -91,6 +93,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorStatus, setErrorStatus] = useState('');
   const [localProvider, setLocalProvider] = useState(defaultAiProvider);
+  const [isLoadedFromMemory, setIsLoadedFromMemory] = useState(false);
 
   useImperativeHandle(ref, () => ({
     saveFile: () => saveHtmlFile(false),
@@ -142,13 +145,26 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
     if (!imgInfo || !imgInfo.originalSrc) {
       setCurrentImageFile(null);
       setCurrentImageUrl('');
+      setGeneratedAlt('');
+      setIsLoadedFromMemory(false);
       setErrorStatus('No source path in image tag.');
       return;
     }
-    setGeneratedAlt(imgInfo.alt || '');
-    setErrorStatus('');
     
     let fileName = imgInfo.originalSrc;
+    const fileNameOnly = fileName.split('/').pop();
+    
+    let altToSet = imgInfo.alt || '';
+    let fromMemory = false;
+
+    if (fileNameOnly && altTextMemory[fileNameOnly]) {
+        altToSet = altTextMemory[fileNameOnly];
+        fromMemory = true;
+    }
+
+    setGeneratedAlt(altToSet);
+    setIsLoadedFromMemory(fromMemory);
+    setErrorStatus('');
     const file = await resolveImagePath(projectDirHandle, fileName);
 
     if (file) {
@@ -314,6 +330,12 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
       return;
     }
     const currentImg = imagesArr[currentIndex];
+    
+    const fileNameOnly = currentImg.originalSrc ? currentImg.originalSrc.split('/').pop() : null;
+    if (fileNameOnly) {
+        setAltTextMemory(prev => ({ ...prev, [fileNameOnly]: generatedAlt }));
+    }
+
     const newHtml = updateHtmlWithAlt(htmlContent, currentImg, generatedAlt);
     setHtmlContent(newHtml);
     if (onContentChange) onContentChange();
@@ -412,21 +434,31 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
                           </div>
                       </div>
                       
-                      <div className="flex gap-3 mb-4">
-                          <textarea 
-                              value={generatedAlt}
-                              onChange={(e) => setGeneratedAlt(e.target.value)}
-                              placeholder="Describe the image or generate with AI..."
-                              className="flex-1 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none h-24"
-                          />
-                          <div className="flex flex-col gap-2">
-                              <button onClick={generateAltText} disabled={isGenerating || !currentImageFile} className="btn-premium flex-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-4">
-                                  {isGenerating ? <RotateCcw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                                  Generate with AI
-                              </button>
-                              <button onClick={saveAlt} disabled={!generatedAlt || isGenerating} className="btn-premium flex-1 bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-400 px-4">
-                                  <Save className="w-4 h-4" /> Update & Next
-                              </button>
+                      <div className="flex flex-col gap-3 mb-4">
+                          {isLoadedFromMemory && (
+                              <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-2 -mb-1 shadow-sm">
+                                  <Info className="w-4 h-4 shrink-0" /> Text retrieved from memory
+                              </div>
+                          )}
+                          <div className="flex gap-3">
+                              <textarea 
+                                  value={generatedAlt}
+                                  onChange={(e) => {
+                                      setGeneratedAlt(e.target.value);
+                                      setIsLoadedFromMemory(false);
+                                  }}
+                                  placeholder="Describe the image or generate with AI..."
+                                  className="flex-1 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none h-24"
+                              />
+                              <div className="flex flex-col gap-2">
+                                  <button onClick={generateAltText} disabled={isGenerating || !currentImageFile} className="btn-premium flex-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-4">
+                                      {isGenerating ? <RotateCcw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                                      Generate with AI
+                                  </button>
+                                  <button onClick={saveAlt} disabled={!generatedAlt || isGenerating} className="btn-premium flex-1 bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-400 px-4">
+                                      <Save className="w-4 h-4" /> Update & Next
+                                  </button>
+                              </div>
                           </div>
                       </div>
                       

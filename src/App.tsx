@@ -51,7 +51,21 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempApiKeys, setTempApiKeys] = useState(apiKeys);
   const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(true);
+  const [altTextMemory, setAltTextMemory] = useState<Record<string, string>>(() => {
+      const saved = localStorage.getItem('altTextMemory');
+      return saved ? JSON.parse(saved) : {};
+  });
+  
   const [autoSwitchEnabled, setAutoSwitchEnabled] = useState(false);
+
+  useEffect(() => {
+      localStorage.setItem('apiKeys', JSON.stringify(apiKeys));
+  }, [apiKeys]);
+
+  useEffect(() => {
+      localStorage.setItem('altTextMemory', JSON.stringify(altTextMemory));
+  }, [altTextMemory]);
+
   const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null);
   const [showOpenConfirm, setShowOpenConfirm] = useState(false);
   
@@ -402,6 +416,8 @@ export default function App() {
                        showToast={showToast} 
                        isAutoSaveEnabled={isAutoSaveEnabled} 
                        autoSwitchEnabled={autoSwitchEnabled}
+                       altTextMemory={altTextMemory}
+                       setAltTextMemory={setAltTextMemory}
                    />
                ) : (
                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
@@ -483,6 +499,21 @@ export default function App() {
                              </div>
                              <button onClick={() => setIsAutoSaveEnabled(!isAutoSaveEnabled)} className={cn("w-12 h-6 rounded-full transition-colors relative flex-shrink-0", isAutoSaveEnabled ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600")}>
                                  <div className={cn("w-4 h-4 bg-white rounded-full absolute top-1 transition-all", isAutoSaveEnabled ? "left-7" : "left-1")}></div>
+                             </button>
+                         </div>
+
+                         <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-xl border border-red-200 dark:border-red-800/30 flex items-center justify-between mt-8">
+                             <div className="flex flex-col mr-4">
+                                 <span className="font-bold text-red-800 dark:text-red-400 text-sm">Clear Alt-Text Memory</span>
+                                 <span className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">Alt-text memory saves your previously generated alt-texts and auto-fills them when the same image is found. Clearing this will delete all saved associations.</span>
+                             </div>
+                             <button onClick={() => {
+                                 if (window.confirm("Are you sure you want to clear all saved alt-text memory? This action cannot be undone.")) {
+                                     setAltTextMemory({});
+                                     showToast("Alt-text memory cleared.", 'success');
+                                 }
+                             }} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold transition-colors whitespace-nowrap outline-none focus:ring-2 focus:ring-red-500">
+                                 Clear Memory
                              </button>
                          </div>
                      </section>

@@ -23,6 +23,7 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
   - <img src="https://cdn.simpleicons.org/openai/412991" width="16" height="16" align="center" alt="ChatGPT Logo" /> OpenAI ChatGPT
   - <img src="https://cdn.simpleicons.org/anthropic/D97757" width="16" height="16" align="center" alt="Claude Logo" /> Anthropic Claude
 - **Smart Auto-Switching:** If your active model runs out of quota (429 rate limit), the app automatically switches to your next configured API key to prevent workflow interruption. (Requires 2+ keys saved).
+- **Intelligent Alt-Text Memory:** The app seamlessly remembers your generated alt-texts and permanently associates them with the image's filename. If that same image is detected anywhere else, the app instantly pre-fills the input box, preventing redundant API calls and manual copying.
 - **Privacy-First Local Processing:** Your project files are parsed entirely locally. Only the specific images being processed are securely sent to the AI vision models as base64 strings.
 - **Live Code Preview:** See exactly where your images exist in your HTML with real-time, auto-scrolling syntax highlighting with automatic long-line text wrapping.
 - **Accessibility & UX:** Fully accessible with custom hover tooltips, screen-reader polite announcements, WCAG AA compliant contrast ratios, and a beautiful Dark/Light mode UI.
@@ -39,6 +40,10 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
 ---
 
 ## 📝 Changelog
+
+### v1.1.0
+- **Feature:** Introduced **Intelligent Alt-Text Memory**. Generated descriptions are now automatically saved and mapped to image filenames. The app will autonomously pre-fill the alt-text box whenever it encounters the same image globally, notifying the user.
+- **Enhancement:** Added a comprehensive memory management panel in Settings to clear saved alt-texts safely.
 
 ### v1.0.6
 - **Architecture:** Transitioned from a simple linear flow to a comprehensive Project-Wide IDE layout.
