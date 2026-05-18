@@ -99,13 +99,15 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
     saveFile: () => saveHtmlFile(false),
     saveCopy: async () => {
         try {
-            const newHandle = await (window as any).showSaveFilePicker({
-                suggestedName: fileHandle.name.replace('.html', '-copy.html'),
-                types: [{ description: 'HTML Files', accept: { 'text/html': ['.html', '.htm'] } }]
-            });
-            const writable = await newHandle.createWritable();
-            await writable.write(htmlContent);
-            await writable.close();
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileHandle.name.replace('.html', '-copy.html');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
             showToast("Copy saved successfully!", 'success');
         } catch (e) {
             showToast("Failed to save copy.", 'error');

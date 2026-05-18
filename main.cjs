@@ -25,6 +25,17 @@ function createWindow() {
     }
     return { action: 'deny' };
   });
+
+  // Force a "Save As" dialog for any downloads (like saving a copy of the HTML)
+  mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
+    item.setSaveDialogOptions({
+      title: 'Save Copy As',
+      filters: [
+        { name: 'HTML Files', extensions: ['html', 'htm'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
+  });
   
   // Uncomment below to open DevTools
   // mainWindow.webContents.openDevTools();

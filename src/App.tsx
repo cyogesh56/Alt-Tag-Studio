@@ -42,10 +42,13 @@ export default function App() {
   const [activeTabPath, setActiveTabPath] = useState<string | null>(null);
 
   const [aiProvider, setAiProvider] = useState<AIProvider>('gemini');
-  const [apiKeys, setApiKeys] = useState<Record<string, string>>({
-    gemini: process.env.GEMINI_API_KEY || '',
-    openai: '',
-    anthropic: ''
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>(() => {
+    const saved = localStorage.getItem('apiKeys');
+    return saved ? JSON.parse(saved) : {
+      gemini: process.env.GEMINI_API_KEY || '',
+      openai: '',
+      anthropic: ''
+    };
   });
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -68,6 +71,7 @@ export default function App() {
 
   const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null);
   const [showOpenConfirm, setShowOpenConfirm] = useState(false);
+  const [needsPermission, setNeedsPermission] = useState(false);
   
   const editorRef = useRef<EditorRef>(null);
 
@@ -89,6 +93,14 @@ export default function App() {
           const handle = await getProjectHandle();
           if (handle) {
              setProjectDirHandle(handle);
+             setIsLanding(false);
+             setIsSetup(false);
+             if (await verifyPermission(handle, true)) {
+                 const tree = await buildFileTree(handle);
+                 setFileTree(tree);
+             } else {
+                 setNeedsPermission(true);
+             }
           }
       };
       loadPersistedState();
@@ -373,7 +385,29 @@ export default function App() {
        </aside>
 
        {/* Static Panes for Explorer and Editor */}
-       <div className="flex flex-1 min-w-0 overflow-hidden">
+       <div className="flex flex-1 min-w-0 overflow-hidden relative">
+           
+           {needsPermission && (
+               <div className="absolute inset-0 z-[100] bg-white/80 dark:bg-[#0B0F19]/80 backdrop-blur-sm flex items-center justify-center">
+                   <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col items-center max-w-sm text-center animate-fade-in">
+                       <FolderOpen className="w-12 h-12 text-indigo-500 mb-4" />
+                       <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Resume Session</h3>
+                       <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Click below to grant permission and resume your previous project session.</p>
+                       <button onClick={async () => {
+                           if (await verifyPermission(projectDirHandle, true)) {
+                               const tree = await buildFileTree(projectDirHandle);
+                               setFileTree(tree);
+                               setNeedsPermission(false);
+                           } else {
+                               showToast("Permission denied.", "error");
+                           }
+                       }} className="btn-premium px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold w-full transition-colors outline-none focus:ring-2 focus:ring-indigo-500">
+                           Grant Permission & Resume
+                       </button>
+                   </div>
+               </div>
+           )}
+
            <div className="w-64 flex flex-col bg-slate-50 dark:bg-[#0f1423] z-10 border-r border-slate-200 dark:border-slate-800 shrink-0">
                <div className="h-12 flex items-center px-4 font-bold text-xs tracking-wider text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800 shrink-0">
                    Explorer

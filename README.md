@@ -37,9 +37,12 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
 3. **Select HTML Files:** Click any `.html` file from the explorer to open it in a new tab.
 4. **Generate & Update:** The app displays the image and surrounding code context. Click **Generate with AI** to let the AI analyze the image, or write it manually. Click **Update & Next** to seamlessly inject the `alt` attribute back into your local file.
 
----
-
 ## 📝 Changelog
+
+### v1.1.2
+- **UX Fix:** Reopening the app now automatically bypasses the landing page and opens directly into the IDE, seamlessly restoring your previous session.
+- **Fix:** Fixed a bug where saved API keys were not correctly restoring from memory upon app launch.
+- **Fix:** The "Save Copy" function now explicitly forces the native OS "Save As" dialog to prompt the user for the destination path.
 
 ### v1.1.0
 - **Feature:** Introduced **Intelligent Alt-Text Memory**. Generated descriptions are now automatically saved and mapped to image filenames. The app will autonomously pre-fill the alt-text box whenever it encounters the same image globally, notifying the user.

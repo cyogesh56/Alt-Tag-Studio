@@ -22,8 +22,12 @@ export const verifyPermission = async (fileHandle: any, readWrite: boolean = fal
   if ((await fileHandle.queryPermission(options)) === 'granted') {
     return true;
   }
-  if ((await fileHandle.requestPermission(options)) === 'granted') {
-    return true;
+  try {
+    if ((await fileHandle.requestPermission(options)) === 'granted') {
+      return true;
+    }
+  } catch (e) {
+    return false;
   }
   return false;
 };
