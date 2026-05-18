@@ -7,6 +7,10 @@
 
 Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is a native desktop application that works completely **locally on your machine**. It uses the modern File System Access API to parse your HTML, read your local image folders securely, and seamlessly inject AI-generated alt texts back into your original HTML files without requiring you to manually copy, paste, or download duplicated files.
 
+## 🚀 Download for macOS, Windows, Linux
+
+[![Download from Releases](https://img.shields.io/badge/Download%20from%20Releases-blue?style=for-the-badge&logo=github)](https://github.com/cyogesh56/Alt-Tag-Studio/releases/)
+
 ---
 
 ![Alt-Tag Studio Demo](https://github.com/cyogesh56/Alt-Tag-Studio/blob/20c66d24c6b1b21640ad595e66f1b391d64d0d9b/Alt-Tag%20Studio%20Demo.webp)
@@ -65,10 +69,6 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
 - **Initial Release:** Privacy-first, local File System Access API parsing for automated WCAG-compliant Alt-Text generation using Google Gemini, OpenAI ChatGPT, and Anthropic Claude.
 
 ---
-
-## 🚀 Getting Started (Download for macOS, Windows, Linux)
-
-[![Download from Releases](https://img.shields.io/badge/Download%20from%20Releases-blue?style=for-the-badge&logo=github)](https://github.com/cyogesh56/Alt-Tag-Studio/releases/)
 
 ## 🚀 Getting Started (Development)
 
