@@ -364,16 +364,16 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
       const afterStr = htmlContent.substring(currentImg.endIndex);
       
       return (
-          <div className="text-sm font-mono leading-relaxed p-4 h-full overflow-y-auto">
-              <SyntaxHighlighter language="html" style={tomorrow} customStyle={{ margin: 0, padding: 0, background: 'transparent' }} wrapLines={true} wrapLongLines={true}>
+          <div tabIndex={0} className="text-sm font-mono leading-relaxed p-4 h-full overflow-y-auto overflow-x-hidden">
+              <SyntaxHighlighter language="html" style={tomorrow} customStyle={{ margin: 0, padding: 0, background: 'transparent', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }} lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }} wrapLines={true} wrapLongLines={true}>
                   {beforeStr}
               </SyntaxHighlighter>
               <div id="active-image-tag" className="bg-indigo-500/20 border-l-4 border-indigo-500 my-1 -mx-4 px-4 py-2 rounded-r animate-fade-in shadow-[inset_0_0_20px_rgba(99,102,241,0.1)]">
-                  <SyntaxHighlighter language="html" style={tomorrow} customStyle={{ margin: 0, padding: 0, background: 'transparent' }} wrapLines={true} wrapLongLines={true}>
+                  <SyntaxHighlighter language="html" style={tomorrow} customStyle={{ margin: 0, padding: 0, background: 'transparent', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }} lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }} wrapLines={true} wrapLongLines={true}>
                       {highlightStr}
                   </SyntaxHighlighter>
               </div>
-              <SyntaxHighlighter language="html" style={tomorrow} customStyle={{ margin: 0, padding: 0, background: 'transparent' }} wrapLines={true} wrapLongLines={true}>
+              <SyntaxHighlighter language="html" style={tomorrow} customStyle={{ margin: 0, padding: 0, background: 'transparent', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }} lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }} wrapLines={true} wrapLongLines={true}>
                   {afterStr}
               </SyntaxHighlighter>
           </div>

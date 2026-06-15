@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Settings, Sun, Moon, Zap, ArrowRight, Folder, FolderOpen, Check, Info, X, ExternalLink, Key, RotateCcw, Save, Copy } from 'lucide-react';
+import { Settings, Sun, Moon, Zap, ArrowRight, Folder, FolderOpen, Check, Info, X, ExternalLink, Key, RotateCcw, Save, SaveAll, Copy } from 'lucide-react';
 import { cn } from './lib/utils';
 import { FileExplorer } from './components/FileExplorer';
 import { Editor, EditorRef } from './components/Editor';
@@ -344,6 +344,18 @@ export default function App() {
                      Save File (In Place)
                  </div>
              </div>
+
+             <div className="relative group w-full">
+                 <button aria-label="Save All Files" disabled={!activeTab} onClick={() => {
+                     editorRef.current?.saveFile();
+                     showToast("All files saved.", "success");
+                 }} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <SaveAll className="w-5 h-5" aria-hidden="true" />
+                 </button>
+                 <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-50">
+                     Save All Files
+                 </div>
+             </div>
              
              <div className="relative group w-full">
                  <button aria-label="Save a Copy" disabled={!activeTab} onClick={() => editorRef.current?.saveCopy()} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -365,10 +377,10 @@ export default function App() {
                   </div>
               </div>
               {showOpenConfirm && (
-                  <div role="dialog" aria-modal="true" aria-label="Confirm Open Project" className="absolute left-16 bottom-0 ml-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl rounded-xl p-3 z-[9999] animate-fade-in">
+                  <div role="alertdialog" aria-modal="true" aria-label="Confirm Open Project" className="absolute left-16 bottom-0 ml-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl rounded-xl p-3 z-[9999] animate-fade-in">
                       <p className="text-sm text-slate-800 dark:text-slate-200 font-bold mb-3">Open a new project?</p>
                       <div className="flex gap-2">
-                          <button onClick={() => setShowOpenConfirm(false)} className="flex-1 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">Cancel</button>
+                          <button autoFocus onClick={() => setShowOpenConfirm(false)} className="flex-1 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">Cancel</button>
                           <button onClick={openProject} className="flex-1 py-1.5 text-xs font-medium bg-indigo-600 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 outline-none">Confirm</button>
                       </div>
                   </div>
@@ -455,9 +467,9 @@ export default function App() {
                    />
                ) : (
                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
-                       <div className="w-24 h-24 mb-6 opacity-20 dark:opacity-10">
-                           <img src="./logo.png" alt="Logo" className="w-full h-full grayscale" />
-                       </div>
+                        <div className="w-24 h-24 mb-6 opacity-20 dark:opacity-10">
+                            <img src="./logo.png" alt="" aria-hidden="true" className="w-full h-full grayscale" />
+                        </div>
                        <p>Select an HTML file from the explorer to begin.</p>
                    </div>
                )}
@@ -465,9 +477,9 @@ export default function App() {
        </div>
 
        {/* Settings Modal */}
-       {isSettingsOpen && (
-         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-fade-in">
-             <div className="glass-panel rounded-2xl p-6 w-full max-w-xl shadow-float flex flex-col max-h-[90vh] animate-slide-up">
+        {isSettingsOpen && (
+          <div role="dialog" aria-modal="true" aria-label="Settings" className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-fade-in">
+              <div className="glass-panel rounded-2xl p-6 w-full max-w-xl shadow-float flex flex-col max-h-[90vh] animate-slide-up">
                  <header className="flex justify-between items-center mb-6">
                      <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                          <Settings className="w-5 h-5" /> Settings
@@ -552,15 +564,15 @@ export default function App() {
                          </div>
                      </section>
                  </div>
-                 <footer className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 shrink-0">
-                     <button onClick={() => setIsSettingsOpen(false)} className="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Close</button>
-                 </footer>
+                  <footer className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 shrink-0">
+                      <button autoFocus onClick={() => setIsSettingsOpen(false)} className="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Close</button>
+                  </footer>
              </div>
          </div>
        )}
 
        {toast && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] animate-toast-in glass-panel px-6 py-4 rounded-xl shadow-float flex items-center gap-3">
+          <div role="status" aria-live="polite" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] animate-toast-in glass-panel px-6 py-4 rounded-xl shadow-float flex items-center gap-3">
               {toast.type === 'error' ? <Zap className="w-5 h-5 text-red-500" /> : toast.type === 'success' ? <Check className="w-5 h-5 text-emerald-500" /> : <Info className="w-5 h-5 text-indigo-500" />}
               <p className={cn("text-sm font-bold", toast.type === 'error' ? "text-red-500" : "text-slate-800 dark:text-slate-100")}>{toast.message}</p>
           </div>

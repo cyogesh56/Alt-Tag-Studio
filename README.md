@@ -43,6 +43,14 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
 
 ## 📝 Changelog
 
+### v1.1.3
+- **Feature:** Added a new "Save All Files" button to the sidebar for quicker explicit saves.
+- **UI Fix:** Enforced CSS word-wrapping in the Code Preview pane via `lineProps` to correctly wrap long, individual code lines without horizontal scrollbars.
+- **Accessibility Fix:** Added proper ARIA roles and auto-focus logic to all custom modal dialogs.
+- **Accessibility Fix:** Made system toast notifications use `aria-live` so they are gracefully announced to screen-readers.
+- **Accessibility Fix:** Explicitly marked decorative landing page images as hidden from screen readers.
+- **Accessibility Fix:** Added `tabIndex` to scrollable text containers so keyboard-only users can navigate and scroll code previews.
+
 ### v1.1.2
 - **UX Fix:** Reopening the app now automatically bypasses the landing page and opens directly into the IDE, seamlessly restoring your previous session.
 - **Fix:** Fixed a bug where saved API keys were not correctly restoring from memory upon app launch.
