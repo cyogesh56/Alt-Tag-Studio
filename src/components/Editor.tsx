@@ -64,6 +64,7 @@ const PROVIDERS: Record<string, any> = {
 };
 
 interface EditorProps {
+  filePath: string;
   fileHandle: any;
   projectDirHandle: any;
   apiKeys: any;
@@ -74,6 +75,9 @@ interface EditorProps {
   onContentChange?: () => void;
   altTextMemory: Record<string, string>;
   setAltTextMemory: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  completedFiles: Record<string, 'completed' | 'pending'>;
+  setCompletedFiles: React.Dispatch<React.SetStateAction<Record<string, 'completed' | 'pending'>>>;
+  onUnsavedChange?: (isUnsaved: boolean) => void;
 }
 
 export interface EditorRef {
@@ -82,7 +86,7 @@ export interface EditorRef {
   restoreOriginal: () => void;
 }
 
-export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectDirHandle, apiKeys, aiProvider: defaultAiProvider, showToast, isAutoSaveEnabled, autoSwitchEnabled, onContentChange, altTextMemory, setAltTextMemory }, ref) => {
+export const Editor = forwardRef<EditorRef, EditorProps>(({ filePath, fileHandle, projectDirHandle, apiKeys, aiProvider: defaultAiProvider, showToast, isAutoSaveEnabled, autoSwitchEnabled, onContentChange, altTextMemory, setAltTextMemory, completedFiles, setCompletedFiles, onUnsavedChange }, ref) => {
   const [htmlContent, setHtmlContent] = useState('');
   const [originalHtmlContent, setOriginalHtmlContent] = useState('');
   const [imagesArr, setImagesArr] = useState<any[]>([]);
@@ -135,6 +139,20 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
       setImagesArr(parseImages(htmlContent));
     }
   }, [htmlContent]);
+
+  useEffect(() => {
+      onUnsavedChange?.(htmlContent !== originalHtmlContent);
+  }, [htmlContent, originalHtmlContent, onUnsavedChange]);
+
+  useEffect(() => {
+      // Check for pending status
+      if (completedFiles[filePath] === 'completed' && imagesArr.length > 0) {
+          const missingCount = imagesArr.filter(i => !i.alt).length;
+          if (missingCount > 0) {
+              setCompletedFiles(prev => ({ ...prev, [filePath]: 'pending' }));
+          }
+      }
+  }, [imagesArr, completedFiles, filePath, setCompletedFiles]);
 
   useEffect(() => {
     if (imagesArr.length > 0 && imagesArr[currentIndex]) {
@@ -388,10 +406,25 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
   return (
     <div className="flex-1 overflow-hidden bg-white dark:bg-slate-900 grid grid-cols-12 h-full">
       <section className="col-span-5 border-r border-slate-200 dark:border-slate-800 bg-[#1d1f21] overflow-hidden flex flex-col relative h-full">
-          <div className="h-10 bg-[#151619] border-b border-black/20 flex items-center px-4 shrink-0 justify-between">
+          <div className="h-10 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 shrink-0 justify-between">
               <span className="text-xs font-medium text-slate-400 font-mono">{fileHandle.name}</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">{imagesArr.length} Images</span>
+                 <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
+                    <input 
+                       type="checkbox" 
+                       className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                       checked={completedFiles[filePath] === 'completed' || completedFiles[filePath] === 'pending'}
+                       onChange={(e) => {
+                           setCompletedFiles(prev => {
+                               const next = { ...prev };
+                               if (e.target.checked) next[filePath] = 'completed';
+                               else delete next[filePath];
+                               return next;
+                           });
+                       }}
+                    />
+                    {completedFiles[filePath] === 'pending' ? '⚠️ Pending' : (completedFiles[filePath] === 'completed' ? '✅ Completed' : 'Mark as Completed')}
+                 </label>
               </div>
           </div>
           <div className="flex-1 overflow-hidden relative">
@@ -416,24 +449,34 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ fileHandle, projectD
                   </div>
                   
                   <div className="shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                      <div className="grid grid-cols-3 gap-4 mb-5">
+                          <div className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Current Image</span>
+                              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Image {currentIndex + 1}</span>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Images Processed</span>
+                              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{imagesArr.filter(i => i.alt).length} of {imagesArr.length}</span>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">AI Selection</span>
+                              {Object.keys(configuredProviders).length > 0 ? (
+                                  <ProviderDropdown 
+                                      value={localProvider} 
+                                      onChange={(val) => setLocalProvider(val)} 
+                                      providers={configuredProviders} 
+                                      className="w-full text-sm -mt-1"
+                                  />
+                              ) : (
+                                  <span className="text-xs text-red-500 font-medium">No API Keys Configured</span>
+                              )}
+                          </div>
+                      </div>
+
+                      <hr className="border-slate-200 dark:border-slate-800 mb-5" />
+
                       <div className="flex justify-between items-end mb-4">
                           <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alt Text <span className="font-normal text-slate-500">(Edit manually or Generate with AI)</span></label>
-                          <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-2 w-48">
-                                 <span className="text-xs font-medium text-slate-500">AI:</span>
-                                 {Object.keys(configuredProviders).length > 0 ? (
-                                     <ProviderDropdown 
-                                         value={localProvider} 
-                                         onChange={(val) => setLocalProvider(val)} 
-                                         providers={configuredProviders} 
-                                         className="w-full"
-                                     />
-                                 ) : (
-                                     <span className="text-xs text-red-500 font-medium">No API Keys Configured</span>
-                                 )}
-                              </div>
-                              <span className="text-xs font-mono text-slate-400">Image {currentIndex + 1} of {imagesArr.length}</span>
-                          </div>
                       </div>
                       
                       <div className="flex flex-col gap-3 mb-4">

@@ -8,9 +8,11 @@ interface FileExplorerProps {
   onToggleDir: (path: string) => void;
   onFileClick: (node: FileNode) => void;
   activePath: string | null;
+  completedFiles?: Record<string, 'completed' | 'pending'>;
+  unsavedFiles?: Record<string, boolean>;
 }
 
-export const FileExplorer: React.FC<FileExplorerProps> = ({ tree, onToggleDir, onFileClick, activePath }) => {
+export const FileExplorer: React.FC<FileExplorerProps> = ({ tree, onToggleDir, onFileClick, activePath, completedFiles = {}, unsavedFiles = {} }) => {
   const renderTree = (nodes: FileNode[], level = 0) => {
     return nodes.map(node => {
       if (node.kind === 'directory') {
@@ -34,20 +36,29 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ tree, onToggleDir, o
         const isHtml = node.name.endsWith('.html') || node.name.endsWith('.htm');
         const isImage = /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(node.name);
         
+        let statusColor = "text-slate-400 dark:text-slate-500"; // default gray (not worked on)
+        if (isHtml) {
+            if (completedFiles[node.path] === 'completed') statusColor = "text-emerald-500 dark:text-emerald-400"; // green
+            else if (completedFiles[node.path] === 'pending') statusColor = "text-orange-500 dark:text-orange-400"; // orange
+        }
+        
+        const isUnsaved = isHtml && unsavedFiles[node.path];
+        
         return (
           <div 
             key={node.path}
             className={cn(
-              "flex items-center gap-2 py-1 px-2 cursor-pointer text-sm transition-colors select-none",
+              "flex items-center gap-1.5 py-1 px-2 cursor-pointer text-sm transition-colors select-none",
               activePath === node.path 
                 ? "bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300" 
                 : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
             )}
-            style={{ paddingLeft: `${level * 12 + 24}px` }}
+            style={{ paddingLeft: `${level * 12 + 18}px` }}
             onClick={() => onFileClick(node)}
           >
+            <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", isUnsaved ? "bg-blue-500" : "bg-transparent")} />
             {isHtml ? (
-                <FileCode className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                <FileCode className={cn("w-4 h-4 flex-shrink-0", statusColor)} />
             ) : isImage ? (
                 <ImageIcon className="w-4 h-4 text-amber-500 flex-shrink-0" />
             ) : (

@@ -43,6 +43,13 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
 
 ## 📝 Changelog
 
+### v1.2.0
+- **Feature:** Added "Completion Status" tracking to let you manually mark files as "Completed".
+- **Feature:** Re-opening a completed file automatically checks for newly added images. If missing alt texts are found, the file goes into a "Pending Update" state.
+- **UI Enhancement:** Overhauled the Editor's control panel with a clean 2x3 grid layout to quickly show "Current Image", "Processed Count", and "AI Selection".
+- **UI Enhancement:** File explorer now visualizes completion statuses using color-coded file icons (Green: Completed, Orange: Pending, Gray: Not started).
+- **UI Enhancement:** Added a blue dot indicator in the file tree to signify unsaved changes within files.
+
 ### v1.1.3
 - **Feature:** Added a new "Save All Files" button to the sidebar for quicker explicit saves.
 - **UI Fix:** Enforced CSS word-wrapping in the Code Preview pane via `lineProps` to correctly wrap long, individual code lines without horizontal scrollbars.

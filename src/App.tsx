@@ -59,6 +59,13 @@ export default function App() {
       return saved ? JSON.parse(saved) : {};
   });
   
+  const [completedFiles, setCompletedFiles] = useState<Record<string, 'completed' | 'pending'>>(() => {
+      const saved = localStorage.getItem('completedFiles');
+      return saved ? JSON.parse(saved) : {};
+  });
+  
+  const [unsavedFiles, setUnsavedFiles] = useState<Record<string, boolean>>({});
+  
   const [autoSwitchEnabled, setAutoSwitchEnabled] = useState(false);
 
   useEffect(() => {
@@ -68,6 +75,10 @@ export default function App() {
   useEffect(() => {
       localStorage.setItem('altTextMemory', JSON.stringify(altTextMemory));
   }, [altTextMemory]);
+
+  useEffect(() => {
+      localStorage.setItem('completedFiles', JSON.stringify(completedFiles));
+  }, [completedFiles]);
 
   const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null);
   const [showOpenConfirm, setShowOpenConfirm] = useState(false);
@@ -424,7 +435,7 @@ export default function App() {
                <div className="h-12 flex items-center px-4 font-bold text-xs tracking-wider text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800 shrink-0">
                    Explorer
                </div>
-               <FileExplorer tree={fileTree} onToggleDir={handleToggleDir} onFileClick={handleFileClick} activePath={activeTabPath} />
+               <FileExplorer tree={fileTree} onToggleDir={handleToggleDir} onFileClick={handleFileClick} activePath={activeTabPath} completedFiles={completedFiles} unsavedFiles={unsavedFiles} />
            </div>
 
            <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white dark:bg-[#0B0F19]">
@@ -455,6 +466,7 @@ export default function App() {
                    <Editor 
                        key={activeTab.path} 
                        ref={editorRef}
+                       filePath={activeTab.path}
                        fileHandle={activeTab.handle} 
                        projectDirHandle={projectDirHandle} 
                        apiKeys={apiKeys} 
@@ -464,6 +476,17 @@ export default function App() {
                        autoSwitchEnabled={autoSwitchEnabled}
                        altTextMemory={altTextMemory}
                        setAltTextMemory={setAltTextMemory}
+                       completedFiles={completedFiles}
+                       setCompletedFiles={setCompletedFiles}
+                       onUnsavedChange={(isUnsaved) => {
+                           setUnsavedFiles(prev => {
+                               if (prev[activeTab.path] === isUnsaved) return prev;
+                               const next = { ...prev };
+                               if (isUnsaved) next[activeTab.path] = true;
+                               else delete next[activeTab.path];
+                               return next;
+                           });
+                       }}
                    />
                ) : (
                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
