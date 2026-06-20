@@ -24,12 +24,28 @@ const toBase64 = (file: File): Promise<{ data: string; mimeType: string }> => {
   });
 };
 
-function parseImages(html: string) {
-  const imgRegex = /<img([^>]+)>/gi;
+function parseImages(content: string, isMarkdown: boolean = false) {
   const matches = [];
-  let match;
   let idCounter = 0;
-  while ((match = imgRegex.exec(html)) !== null) {
+
+  if (isMarkdown) {
+    const mdRegex = /!\[(.*?)\]\((.*?)\)/g;
+    let match;
+    while ((match = mdRegex.exec(content)) !== null) {
+      matches.push({
+        id: `img_${idCounter++}`,
+        startIndex: match.index,
+        endIndex: match.index + match[0].length,
+        fullTag: match[0],
+        originalSrc: match[2],
+        alt: match[1] || null,
+      });
+    }
+  }
+
+  const imgRegex = /<img([^>]+)>/gi;
+  let match;
+  while ((match = imgRegex.exec(content)) !== null) {
     const fullTag = match[0];
     const srcMatch = fullTag.match(/src\s*=\s*(['"])(.*?)\1/i);
     const altMatch = fullTag.match(/alt\s*=\s*(['"])(.*?)\1/i);
@@ -43,18 +59,25 @@ function parseImages(html: string) {
       alt: altMatch ? altMatch[2] : null,
     });
   }
+
+  matches.sort((a, b) => a.startIndex - b.startIndex);
   return matches;
 }
 
-function updateHtmlWithAlt(html: string, img: any, newAlt: string): string {
+function updateHtmlWithAlt(content: string, img: any, newAlt: string, isMarkdown: boolean = false): string {
   let newTag = img.fullTag;
-  const escapedAlt = newAlt.replace(/"/g, '&quot;');
-  if (newTag.match(/alt\s*=\s*(['"]).*?\1/i)) {
-    newTag = newTag.replace(/(alt\s*=\s*(['"])).*?(\2)/i, `$1${escapedAlt}$3`);
+  
+  if (isMarkdown && newTag.startsWith('![')) {
+    newTag = `![${newAlt}](${img.originalSrc})`;
   } else {
-    newTag = newTag.replace(/\s*\/?>$/, ` alt="${escapedAlt}">`);
+    const escapedAlt = newAlt.replace(/"/g, '&quot;');
+    if (newTag.match(/alt\s*=\s*(['"]).*?\1/i)) {
+      newTag = newTag.replace(/(alt\s*=\s*(['"])).*?(\2)/i, `$1${escapedAlt}$3`);
+    } else {
+      newTag = newTag.replace(/\s*\/?>$/, ` alt="${escapedAlt}">`);
+    }
   }
-  return html.substring(0, img.startIndex) + newTag + html.substring(img.endIndex);
+  return content.substring(0, img.startIndex) + newTag + content.substring(img.endIndex);
 }
 
 const PROVIDERS: Record<string, any> = {
@@ -136,7 +159,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ filePath, fileHandle
 
   useEffect(() => {
     if (htmlContent) {
-      setImagesArr(parseImages(htmlContent));
+      setImagesArr(parseImages(htmlContent, fileHandle.name.endsWith('.md')));
     }
   }, [htmlContent]);
 
@@ -144,15 +167,6 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ filePath, fileHandle
       onUnsavedChange?.(htmlContent !== originalHtmlContent);
   }, [htmlContent, originalHtmlContent, onUnsavedChange]);
 
-  useEffect(() => {
-      // Check for pending status
-      if (completedFiles[filePath] === 'completed' && imagesArr.length > 0) {
-          const missingCount = imagesArr.filter(i => !i.alt).length;
-          if (missingCount > 0) {
-              setCompletedFiles(prev => ({ ...prev, [filePath]: 'pending' }));
-          }
-      }
-  }, [imagesArr, completedFiles, filePath, setCompletedFiles]);
 
   useEffect(() => {
     if (imagesArr.length > 0 && imagesArr[currentIndex]) {
@@ -330,6 +344,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ filePath, fileHandle
         const writable = await fileHandle.createWritable();
         await writable.write(htmlContent);
         await writable.close();
+        setOriginalHtmlContent(htmlContent);
         if (!isAutoSave) showToast("File saved successfully!", 'success');
     } catch (e) {
         if (!isAutoSave) showToast("Failed to overwrite the file. You may need to grant file permissions.", 'error');
@@ -356,7 +371,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ filePath, fileHandle
         setAltTextMemory(prev => ({ ...prev, [fileNameOnly]: generatedAlt }));
     }
 
-    const newHtml = updateHtmlWithAlt(htmlContent, currentImg, generatedAlt);
+    const newHtml = updateHtmlWithAlt(htmlContent, currentImg, generatedAlt, fileHandle.name.endsWith('.md'));
     setHtmlContent(newHtml);
     if (onContentChange) onContentChange();
     setTimeout(() => {
@@ -406,25 +421,35 @@ export const Editor = forwardRef<EditorRef, EditorProps>(({ filePath, fileHandle
   return (
     <div className="flex-1 overflow-hidden bg-white dark:bg-slate-900 grid grid-cols-12 h-full">
       <section className="col-span-5 border-r border-slate-200 dark:border-slate-800 bg-[#1d1f21] overflow-hidden flex flex-col relative h-full">
-          <div className="h-10 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 shrink-0 justify-between">
-              <span className="text-xs font-medium text-slate-400 font-mono">{fileHandle.name}</span>
+          <div className="py-2 min-h-[3.5rem] bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 shrink-0 justify-between">
+              <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-200 font-mono">{fileHandle.name}</span>
+                  {completedFiles[filePath] === 'pending' && <span className="text-[10px] text-orange-500 dark:text-orange-400 font-bold uppercase tracking-wider flex items-center gap-1">Pending Update</span>}
+                  {completedFiles[filePath] === 'completed' && <span className="text-[10px] text-emerald-500 dark:text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">Completed</span>}
+                  {!completedFiles[filePath] && <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">In Progress</span>}
+              </div>
               <div className="flex items-center gap-2">
-                 <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-600 dark:text-slate-300">
-                    <input 
-                       type="checkbox" 
-                       className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
-                       checked={completedFiles[filePath] === 'completed' || completedFiles[filePath] === 'pending'}
-                       onChange={(e) => {
-                           setCompletedFiles(prev => {
-                               const next = { ...prev };
-                               if (e.target.checked) next[filePath] = 'completed';
-                               else delete next[filePath];
-                               return next;
-                           });
-                       }}
-                    />
-                    {completedFiles[filePath] === 'pending' ? '⚠️ Pending' : (completedFiles[filePath] === 'completed' ? '✅ Completed' : 'Mark as Completed')}
-                 </label>
+                 <select 
+                     className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm font-bold text-slate-700 dark:text-slate-300 rounded-lg px-3 py-1.5 cursor-pointer focus:ring-2 focus:ring-indigo-500 outline-none"
+                     value={completedFiles[filePath] || 'in-progress'}
+                     onChange={(e) => {
+                         const val = e.target.value;
+                         setCompletedFiles(prev => {
+                             const next = { ...prev };
+                             if (val === 'completed') next[filePath] = 'completed';
+                             else if (val === 'pending') next[filePath] = 'pending';
+                             else delete next[filePath];
+                             return next;
+                         });
+                         if (val === 'completed') showToast("File marked as completed", 'success');
+                         else if (val === 'pending') showToast("File marked as pending", 'info');
+                         else showToast("File unmarked", 'info');
+                     }}
+                 >
+                     <option value="in-progress">In Progress</option>
+                     <option value="pending">Pending</option>
+                     <option value="completed">Completed</option>
+                 </select>
               </div>
           </div>
           <div className="flex-1 overflow-hidden relative">

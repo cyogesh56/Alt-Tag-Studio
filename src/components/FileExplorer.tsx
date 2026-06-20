@@ -34,15 +34,17 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ tree, onToggleDir, o
         );
       } else {
         const isHtml = node.name.endsWith('.html') || node.name.endsWith('.htm');
+        const isMarkdown = node.name.endsWith('.md');
+        const isSupportedFile = isHtml || isMarkdown;
         const isImage = /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(node.name);
         
         let statusColor = "text-slate-400 dark:text-slate-500"; // default gray (not worked on)
-        if (isHtml) {
+        if (isSupportedFile) {
             if (completedFiles[node.path] === 'completed') statusColor = "text-emerald-500 dark:text-emerald-400"; // green
             else if (completedFiles[node.path] === 'pending') statusColor = "text-orange-500 dark:text-orange-400"; // orange
         }
         
-        const isUnsaved = isHtml && unsavedFiles[node.path];
+        const isUnsaved = isSupportedFile && unsavedFiles[node.path];
         
         return (
           <div 
@@ -57,7 +59,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ tree, onToggleDir, o
             onClick={() => onFileClick(node)}
           >
             <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", isUnsaved ? "bg-blue-500" : "bg-transparent")} />
-            {isHtml ? (
+            {isSupportedFile ? (
                 <FileCode className={cn("w-4 h-4 flex-shrink-0", statusColor)} />
             ) : isImage ? (
                 <ImageIcon className="w-4 h-4 text-amber-500 flex-shrink-0" />

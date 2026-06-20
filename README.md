@@ -43,6 +43,15 @@ Rather than uploading your entire codebase to an online tool, Alt-Tag Studio is 
 
 ## 📝 Changelog
 
+### v1.2.5
+- **Feature:** Added full support for Markdown (`.md`) files to automatically detect and parse standard markdown images `![alt](src)`.
+- **Feature:** Replaced the "Mark as Completed" checkbox with a fully functional Status Dropdown ("In Progress", "Pending", "Completed").
+- **Feature:** Added native unsaved file confirmation prompts when closing the app from the title bar or opening a new project, preventing accidental data loss.
+- **UI Enhancement:** Moved status badges directly underneath the filename in the editor header, color-matching them perfectly with the file explorer icons (and removing emojis).
+- **UX Fix:** The "Pending" auto-override logic has been removed so manually changing a file's status correctly retains it.
+- **UX Fix:** The unsaved blue dot indicator now correctly disappears instantly when a file is saved.
+- **UX Fix:** "Save All Files" correctly saves all open unsaved files in memory, instead of just the currently active one.
+
 ### v1.2.0
 - **Feature:** Added "Completion Status" tracking to let you manually mark files as "Completed".
 - **Feature:** Re-opening a completed file automatically checks for newly added images. If missing alt texts are found, the file goes into a "Pending Update" state.

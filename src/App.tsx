@@ -84,7 +84,7 @@ export default function App() {
   const [showOpenConfirm, setShowOpenConfirm] = useState(false);
   const [needsPermission, setNeedsPermission] = useState(false);
   
-  const editorRef = useRef<EditorRef>(null);
+  const editorsRef = useRef<Record<string, EditorRef>>({});
 
   const showToast = (message: string, type: 'info' | 'success' | 'error' = 'info') => {
       setToast({ message, type });
@@ -117,7 +117,23 @@ export default function App() {
       loadPersistedState();
   }, []);
 
+  useEffect(() => {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+          const hasUnsaved = Object.values(unsavedFiles).some(v => v);
+          if (hasUnsaved) {
+              e.preventDefault();
+              e.returnValue = '';
+          }
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [unsavedFiles]);
+
   const openProject = async () => {
+      const hasUnsaved = Object.values(unsavedFiles).some(v => v);
+      if (hasUnsaved && !window.confirm("You have unsaved files. Are you sure you want to open a new project? Unsaved changes will be lost.")) {
+          return;
+      }
       try {
           const dirHandle = await (window as any).showDirectoryPicker();
           await saveProjectHandle(dirHandle);
@@ -339,7 +355,7 @@ export default function App() {
              <div className="h-px bg-slate-200 dark:bg-slate-800 w-8 mx-auto my-1" role="separator"></div>
              
              <div className="relative group w-full">
-                 <button aria-label="Restore Original File" disabled={!activeTab} onClick={() => editorRef.current?.restoreOriginal()} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
+                 <button aria-label="Restore Original File" disabled={!activeTab} onClick={() => activeTabPath && editorsRef.current[activeTabPath]?.restoreOriginal()} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
                     <RotateCcw className="w-5 h-5" aria-hidden="true" />
                  </button>
                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-50">
@@ -348,7 +364,7 @@ export default function App() {
              </div>
              
              <div className="relative group w-full">
-                 <button aria-label="Save File" disabled={!activeTab} onClick={() => editorRef.current?.saveFile()} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
+                 <button aria-label="Save File" disabled={!activeTab} onClick={() => activeTabPath && editorsRef.current[activeTabPath]?.saveFile()} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
                     <Save className="w-5 h-5" aria-hidden="true" />
                  </button>
                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-50">
@@ -357,9 +373,16 @@ export default function App() {
              </div>
 
              <div className="relative group w-full">
-                 <button aria-label="Save All Files" disabled={!activeTab} onClick={() => {
-                     editorRef.current?.saveFile();
-                     showToast("All files saved.", "success");
+                 <button aria-label="Save All Files" disabled={!activeTab} onClick={async () => {
+                     let savedCount = 0;
+                     for (const path of Object.keys(editorsRef.current)) {
+                         if (unsavedFiles[path]) {
+                             await editorsRef.current[path]?.saveFile();
+                             savedCount++;
+                         }
+                     }
+                     if (savedCount > 0) showToast(`All ${savedCount} files saved.`, "success");
+                     else showToast("No unsaved files to save.", "info");
                  }} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
                     <SaveAll className="w-5 h-5" aria-hidden="true" />
                  </button>
@@ -369,7 +392,7 @@ export default function App() {
              </div>
              
              <div className="relative group w-full">
-                 <button aria-label="Save a Copy" disabled={!activeTab} onClick={() => editorRef.current?.saveCopy()} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
+                 <button aria-label="Save a Copy" disabled={!activeTab} onClick={() => activeTabPath && editorsRef.current[activeTabPath]?.saveCopy()} className="w-full aspect-square flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none">
                     <Copy className="w-5 h-5" aria-hidden="true" />
                  </button>
                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-50">
@@ -462,32 +485,38 @@ export default function App() {
                </div>
 
                {/* Editor area */}
-               {activeTab ? (
-                   <Editor 
-                       key={activeTab.path} 
-                       ref={editorRef}
-                       filePath={activeTab.path}
-                       fileHandle={activeTab.handle} 
-                       projectDirHandle={projectDirHandle} 
-                       apiKeys={apiKeys} 
-                       aiProvider={aiProvider} 
-                       showToast={showToast} 
-                       isAutoSaveEnabled={isAutoSaveEnabled} 
-                       autoSwitchEnabled={autoSwitchEnabled}
-                       altTextMemory={altTextMemory}
-                       setAltTextMemory={setAltTextMemory}
-                       completedFiles={completedFiles}
-                       setCompletedFiles={setCompletedFiles}
-                       onUnsavedChange={(isUnsaved) => {
-                           setUnsavedFiles(prev => {
-                               if (prev[activeTab.path] === isUnsaved) return prev;
-                               const next = { ...prev };
-                               if (isUnsaved) next[activeTab.path] = true;
-                               else delete next[activeTab.path];
-                               return next;
-                           });
-                       }}
-                   />
+               {openTabs.length > 0 ? (
+                   openTabs.map(tab => (
+                       <div key={tab.path} className={activeTabPath === tab.path ? "flex-1 overflow-hidden relative" : "hidden"}>
+                           <Editor 
+                               ref={(el) => {
+                                   if (el) editorsRef.current[tab.path] = el;
+                                   else delete editorsRef.current[tab.path];
+                               }}
+                               filePath={tab.path}
+                               fileHandle={tab.handle} 
+                               projectDirHandle={projectDirHandle} 
+                               apiKeys={apiKeys} 
+                               aiProvider={aiProvider} 
+                               showToast={showToast} 
+                               isAutoSaveEnabled={isAutoSaveEnabled} 
+                               autoSwitchEnabled={autoSwitchEnabled}
+                               altTextMemory={altTextMemory}
+                               setAltTextMemory={setAltTextMemory}
+                               completedFiles={completedFiles}
+                               setCompletedFiles={setCompletedFiles}
+                               onUnsavedChange={(isUnsaved) => {
+                                   setUnsavedFiles(prev => {
+                                       if (prev[tab.path] === isUnsaved) return prev;
+                                       const next = { ...prev };
+                                       if (isUnsaved) next[tab.path] = true;
+                                       else delete next[tab.path];
+                                       return next;
+                                   });
+                               }}
+                           />
+                       </div>
+                   ))
                ) : (
                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
                         <div className="w-24 h-24 mb-6 opacity-20 dark:opacity-10">

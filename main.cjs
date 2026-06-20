@@ -36,7 +36,24 @@ function createWindow() {
       ]
     });
   });
-  
+  // Handle beforeunload properly in Electron
+  mainWindow.webContents.on('will-prevent-unload', (event) => {
+    const choice = require('electron').dialog.showMessageBoxSync(mainWindow, {
+      type: 'question',
+      buttons: ['Close App', 'Cancel'],
+      title: 'Unsaved Changes',
+      message: 'You have unsaved files. Are you sure you want to close the app? Your unsaved changes will be lost.',
+      defaultId: 0,
+      cancelId: 1
+    });
+    
+    // If the user clicks "Close App" (index 0), we prevent the default behavior of "preventing unload",
+    // thus allowing the app to close.
+    if (choice === 0) {
+      event.preventDefault();
+    }
+  });
+
   // Uncomment below to open DevTools
   // mainWindow.webContents.openDevTools();
 }
